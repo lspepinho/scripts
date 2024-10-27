@@ -14,21 +14,9 @@ export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
 export LLVM=1
 
 AK3_DIR="$HOME/AnyKernel3"
-VARIANTS=("fts" "gdx")
-DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
+VARIANT="fts"
+DEFCONFIG="vendor/bangkk_fts_defconfig"
 ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
-
-if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
-    echo "Uso: $0 --variant {fts|gdx}"
-    exit 1
-fi
-
-VARIANT="$2"
-if [[ "$VARIANT" == "fts" ]]; then
-    DEFCONFIG="${DEFCONFIGS[0]}"
-elif [[ "$VARIANT" == "gdx" ]]; then
-    DEFCONFIG="${DEFCONFIGS[1]}"
-fi
 
 if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Cloning to ${TC_DIR}..."
