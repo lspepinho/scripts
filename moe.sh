@@ -16,7 +16,7 @@ export LLVM=1
 AK3_DIR="$HOME/AnyKernel3"
 VARIANTS=("fts" "gdx")
 DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
-ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
+ZIPNAME_PREFIX="MoeKernel-perf-$(date '+%Y%m%d-%H%M')"
 
 if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
     echo "Uso: $0 --variant {fts|gdx}"
@@ -72,9 +72,9 @@ echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n"
 
 if [ -d "$AK3_DIR" ]; then
     cp -r $AK3_DIR AnyKernel3
-    git -C AnyKernel3 checkout bangkk &> /dev/null
+    git -C AnyKernel3 checkout perf &> /dev/null
 else
-    git clone -q https://github.com/MoeKernel/AnyKernel3 -b inline
+    git clone -q https://github.com/MoeKernel/AnyKernel3 -b perf
 fi
 
 cp out/.config AnyKernel3/config
@@ -90,5 +90,3 @@ cd ..
 echo -e "\nCompleted compilation for $DEFCONFIG (variant $VARIANT) in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s)!"
 echo "Zip: $ZIPNAME"
 rm -rf AnyKernel3
-
-echo -e "\nAll compilations finished!"
