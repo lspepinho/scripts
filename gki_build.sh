@@ -5,8 +5,15 @@
 install_packages() {
     echo "Updating package list and installing necessary packages..."
     sudo apt update
-    sudo apt upgrade -y
-    sudo apt install -y repo git rsync openssl gnutls-bin make
+    sudo apt install -y curl git rsync openssl gnutls-bin make
+}
+
+update_repo() {
+    echo "Installing or updating repo tool..."
+    mkdir -p ~/bin
+    curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+    chmod a+x ~/bin/repo
+    export PATH=~/bin:$PATH
 }
 
 sync_repository() {
@@ -35,6 +42,7 @@ start_build() {
 
 main() {
     install_packages
+    update_repo
     sync_repository
     download_build_sh
     start_build
