@@ -1,15 +1,13 @@
 #!/bin/bash
 
-# Credits: @LSEYTHING ON TELEGRAM
-
 install_packages() {
-    echo "Updating package list and installing necessary packages..."
+    echo "Atualizando lista de pacotes e instalando dependências necessárias..."
     sudo apt update
     sudo apt install -y curl git rsync openssl gnutls-bin make
 }
 
-update_repo() {
-    echo "Installing or updating repo tool..."
+update_repo_tool() {
+    echo "Instalando ou atualizando a ferramenta repo..."
     mkdir -p ~/bin
     curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
     chmod a+x ~/bin/repo
@@ -17,36 +15,32 @@ update_repo() {
 }
 
 sync_repository() {
-    echo "Syncing repository..."
-    repo init -u https://android.googlesource.com/kernel/manifest -b common-android13-5.15
+    echo "Sincronizando o repositório do kernel Android 13 (5.10)..."
+    mkdir -p android-kernel && cd android-kernel
+    repo init -u https://android.googlesource.com/kernel/manifest -b common-android13-5.10
     repo sync
+    cd ..
 }
 
-download_build_sh() {
-    echo "Checking if build.sh exists..."
-    if [ ! -f "builder.sh" ]; then
-        echo "builder.sh not found! Download or place the script in the current directory."
+run_build_gki_style() {
+    echo "Verificando se build.sh existe no diretório build..."
+    if [ ! -f "android-kernel/build/build.sh" ]; then
+        echo "build.sh não encontrado no diretório android-kernel/build! Certifique-se de que o script está no lugar correto."
         exit 1
-    else
-        echo "builder.sh found."
     fi
-}
 
-start_build() {
-    echo "Navigating to experimental directory..."
-    cd experimental || { echo "experimental directory not found!"; exit 1; }
-    
-    echo "Running builder.sh..."
-    bash builder.sh
+    echo "Iniciando o processo de build com estilo GKI..."
+    cd android-kernel/build || { echo "Diretório build não encontrado!"; exit 1; }
+    bash build.sh
+    cd ../..
 }
 
 main() {
     install_packages
-    update_repo
+    update_repo_tool
     sync_repository
-    download_build_sh
-    start_build
-    echo "Your preparation and build finished."
+    run_build_gki_style
+    echo "Build concluído com sucesso para Android 13 Kernel 5.10!"
 }
 
 main
