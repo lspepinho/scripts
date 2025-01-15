@@ -3,12 +3,12 @@
 # Copyright (C) 2020-2021 Adithya R.
 
 SECONDS=0
-ZIPNAME="MoeKSU-ginkgo-$(date '+%Y%m%d').zip"
+ZIPNAME="Moe-s9+-$(date '+%Y%m%d').zip"
 TC_DIR="$HOME/tc/clang-20.0.0"
 GCC_64_DIR="$HOME/tc/aarch64-linux-android-15.0"
 GCC_32_DIR="$HOME/tc/arm-linux-androideabi-15.0"
 AK3_DIR="$HOME/android/AnyKernel3"
-DEFCONFIG="vendor/moe_defconfig"
+DEFCONFIG="star2qlte_chn_open_defconfig"
 
 export PATH="$TC_DIR/bin:$PATH"
 
