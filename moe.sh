@@ -65,17 +65,7 @@ make -j$(nproc --all) \
     O=out \
     ARCH=arm64 \
     CC="ccache clang" \
-    #LD=ld.lld \
-    AR=llvm-ar \
-    AS=llvm-as \
-    NM=llvm-nm \
-    OBJCOPY=llvm-objcopy \
-    OBJDUMP=llvm-objdump \
-    STRIP=llvm-strip \
     CROSS_COMPILE=$GCC_64_DIR/bin/aarch64-linux-android- \
-    CROSS_COMPILE_ARM32=$GCC_32_DIR/bin/arm-linux-androideabi- \
-    CLANG_TRIPLE=aarch64-linux-gnu- \
-    KCFLAGS=-mno-android \
     Image.gz-dtb
 
 if [ -f "out/arch/arm64/boot/Image.gz-dtb" ] && \
