@@ -4,7 +4,7 @@
 
 SECONDS=0
 ZIPNAME="MoeKSU-ginkgo-$(date '+%Y%m%d').zip"
-TC_DIR="$HOME/tc/clang-20.0.0"
+TC_DIR="$HOME/tc/clang-11.0.0"
 GCC_64_DIR="$HOME/tc/aarch64-linux-android-15.0"
 GCC_32_DIR="$HOME/tc/arm-linux-androideabi-15.0"
 AK3_DIR="$HOME/android/AnyKernel3"
@@ -16,11 +16,11 @@ export KBUILD_BUILD_USER=Moe
 export KBUILD_BUILD_HOST=Nyan
 
 if ! [ -d "${TC_DIR}" ]; then
-    echo "Clang not found! Cloning to ${TC_DIR}..."
-    if ! git clone --depth=1 https://gitlab.com/moehacker/clang-r498229b ${TC_DIR}; then
-        echo "Cloning failed! Aborting..."
-        exit 1
-    fi
+    echo "Clang not found! Importing to ${TC_DIR}..."
+    wget https://github.com/ZyCromerZ/Clang/releases/download/11.1.0-20220724-release/Clang-11.1.0-20220724.tar.gz
+    mkdir -p "${TC_DIR}"
+    tar -xzf Clang-11.1.0-20220724.tar.gz -C "${TC_DIR}" --strip-components=1
+    echo "Clang successfully imported to ${TC_DIR}!"
 fi
 
 if ! [ -d "${GCC_64_DIR}" ]; then
