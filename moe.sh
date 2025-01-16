@@ -8,7 +8,7 @@ TC_DIR="$HOME/tc/clang-11.0.0"
 GCC_64_DIR="$HOME/tc/aarch64-linux-android-15.0"
 GCC_32_DIR="$HOME/tc/arm-linux-androideabi-15.0"
 AK3_DIR="$HOME/android/AnyKernel3"
-DEFCONFIG=‎"java_defconfig"
+DEFCONFIG=‎"moe_defconfig"
 
 export PATH="$TC_DIR/bin:$PATH"
 
