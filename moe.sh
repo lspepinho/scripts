@@ -25,7 +25,7 @@ fi
 
 if ! [ -d "${GCC_64_DIR}" ]; then
     echo "gcc not found! Cloning to ${GCC_64_DIR}..."
-    if ! git clone --depth=1 -b 15 https://github.com/whyakari/aarch64-zyc-linux-gnu ${GCC_64_DIR}; then
+    if ! git clone --depth=1 -b 14 https://github.com/whyakari/aarch64-zyc-linux-gnu ${GCC_64_DIR}; then
         echo "Cloning failed! Aborting..."
         exit 1
     fi
@@ -33,7 +33,7 @@ fi
 
 if ! [ -d "${GCC_32_DIR}" ]; then
     echo "gcc_32 not found! Cloning to ${GCC_32_DIR}..."
-    if ! git clone --depth=1 -b 15 https://github.com/whyakari/arm-zyc-linux-gnueabi ${GCC_32_DIR}; then
+    if ! git clone --depth=1 -b 14 https://github.com/whyakari/arm-zyc-linux-gnueabi ${GCC_32_DIR}; then
         echo "Cloning failed! Aborting..."
         exit 1
     fi
@@ -64,13 +64,10 @@ echo -e "\nStarting compilation... wait\n"
 make -j$(nproc --all) \
     O=out \
     ARCH=arm64 \
-    CC="ccache clang" \
     CROSS_COMPILE=$GCC_64_DIR/bin/aarch64-linux-android- \
-    CLANG_TRIPLE=aarch64-linux-gnu- \
     Image.gz-dtb
 
-if [ -f "out/arch/arm64/boot/Image.gz-dtb" ] && \
-   [ -f "out/arch/arm64/boot/dtbo.img" ]; then
+if [ -f "out/arch/arm64/boot/Image.gz-dtb" ]; then
     echo -e "\nKernel compiled successfully! Zipping up...\n"
     if [ -d "$AK3_DIR" ]; then
         cp -r $AK3_DIR AnyKernel3
@@ -79,7 +76,6 @@ if [ -f "out/arch/arm64/boot/Image.gz-dtb" ] && \
         exit 1
     fi
     cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
-    cp out/arch/arm64/boot/dtbo.img AnyKernel3
     rm -f *zip
     cd AnyKernel3
     git checkout s9+ &> /dev/null
