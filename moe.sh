@@ -61,6 +61,9 @@ else
 fi
 
 echo -e "\nStarting compilation... wait\n"
+
+mkdir -p out
+make O=out ARCH=arm64 $DEFCONFIG
 make -j$(nproc --all) \
     O=out \
     ARCH=arm64 \
