@@ -77,7 +77,7 @@ make -j$(nproc --all) \
     CLANG_TRIPLE=aarch64-linux-gnu- \
     Image.gz
 
-if [ -f "out/arch/arm64/boot/Image.gz" ] then
+if [ -f "out/arch/arm64/boot/Image.gz" ]; then
     echo -e "\nKernel compiled successfully! Zipping up...\n"
     if [ -d "$AK3_DIR" ]; then
         cp -r $AK3_DIR AnyKernel3
