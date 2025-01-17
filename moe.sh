@@ -5,8 +5,8 @@
 SECONDS=0
 ZIPNAME="Moe-s9+-$(date '+%Y%m%d').zip"
 TC_DIR="$HOME/tc/clang-20.0.0"
-GCC_64_DIR="$HOME/tc/aarch64-linux-android-15.0"
-GCC_32_DIR="$HOME/tc/arm-linux-androideabi-15.0"
+GCC_64_DIR="$HOME/tc/aarch64-linux-android-4.9"
+GCC_32_DIR="$HOME/tc/arm-linux-androideabi-4.9"
 AK3_DIR="$HOME/android/AnyKernel3"
 DEFCONFIG="star2qlte_chn_open_defconfig"
 
@@ -25,7 +25,7 @@ fi
 
 if ! [ -d "${GCC_64_DIR}" ]; then
     echo "gcc not found! Cloning to ${GCC_64_DIR}..."
-    if ! git clone --depth=1 -b 14 https://github.com/whyakari/aarch64-zyc-linux-gnu ${GCC_64_DIR}; then
+    if ! git clone --depth=1 -b lineage-19.1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9.git ${GCC_64_DIR}; then
         echo "Cloning failed! Aborting..."
         exit 1
     fi
@@ -33,7 +33,7 @@ fi
 
 if ! [ -d "${GCC_32_DIR}" ]; then
     echo "gcc_32 not found! Cloning to ${GCC_32_DIR}..."
-    if ! git clone --depth=1 -b 14 https://github.com/whyakari/arm-zyc-linux-gnueabi ${GCC_32_DIR}; then
+    if ! git clone --depth=1 -b lineage-19.1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9.git ${GCC_32_DIR}; then
         echo "Cloning failed! Aborting..."
         exit 1
     fi
