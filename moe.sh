@@ -65,6 +65,7 @@ make -j$(nproc --all) \
      CC=clang \
      CROSS_COMPILE=$GCC_64_DIR/aarch64-linux-android \
      CROSS_COMPILE_ARM32=$GCC_32_DIR/arm-linux-gnueabi- \
+     CLANG_TRIPLE=aarch64-linux-gnu- \
      O=out \
      ARCH=arm64 \
      Image.gz-dtb
