@@ -4,7 +4,7 @@
 
 SECONDS=0
 ZIPNAME="Moe-s9+-$(date '+%Y%m%d').zip"
-TC_DIR="$HOME/tc/clang-9"
+TC_DIR="$HOME/tc/clang-17.0.0"
 GCC_64_DIR="$HOME/tc/aarch64-linux-android-4.9"
 GCC_32_DIR="$HOME/tc/arm-linux-androideabi-4.9"
 AK3_DIR="$HOME/android/AnyKernel3"
@@ -17,7 +17,7 @@ export KBUILD_BUILD_HOST=Nyan
 
 if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Cloning to ${TC_DIR}..."
-    if ! git clone --depth=1 https://gitlab.com/moehacker/clang-r353983c.git ${TC_DIR}; then
+    if ! git clone --depth=1 https://gitlab.com/moehacker/clang-r487747.git ${TC_DIR}; then
         echo "Cloning failed! Aborting..."
         exit 1
     fi
