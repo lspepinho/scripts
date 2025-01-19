@@ -15,21 +15,21 @@ export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
 export LLVM=1
 
 AK3_DIR="$HOME/AnyKernel3"
-VARIANTS=("fts" "gdx")
-DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
+VARIANTS=("fts" "fts")
+DEFCONFIGS=("vendor/pstar_defconfig" "vendor/pstar_defconfig")
 ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
 LOG_FILE="moe.log"
 : > "$LOG_FILE"
 
 if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
-    echo "Use: $0 --variant {fts|gdx}" | tee -a "$LOG_FILE"
+    echo "Use: $0 --variant {fts|fts}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
 VARIANT="$2"
 if [[ "$VARIANT" == "fts" ]]; then
     DEFCONFIG="${DEFCONFIGS[0]}"
-elif [[ "$VARIANT" == "gdx" ]]; then
+elif [[ "$VARIANT" == "fts" ]]; then
     DEFCONFIG="${DEFCONFIGS[1]}"
 fi
 
@@ -77,15 +77,15 @@ echo -e "\nKernel compiled successfully for $DEFCONFIG! Zipping up...\n" | tee -
 
 if [ -d "$AK3_DIR" ]; then
     cp -r $AK3_DIR AnyKernel3
-    git -C AnyKernel3 checkout susfs &> /dev/null
+    git -C AnyKernel3 checkout pstar &> /dev/null
 else
-    git clone -q https://github.com/MoeKernel/AnyKernel3 -b susfs
+    git clone -q https://github.com/MoeKernel/AnyKernel3 -b pstar
 fi
 
 cp out/.config AnyKernel3/config
 cp out/arch/arm64/boot/Image AnyKernel3/Image
-cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
-cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+#cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
+#cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
 
 ZIPNAME="${ZIPNAME_PREFIX}-${VARIANT}.zip"
 
@@ -98,8 +98,8 @@ kmod=$(echo ${kver} | awk -F'.' '{print $3}')
 
 cp out/.config AnyKernel3/config
 cp out/arch/arm64/boot/Image AnyKernel3/Image
-cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
-cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+#cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
+#cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
 cp $(find out/modules/lib/modules/5.4* -name '*.ko') ${modpath}/
 cp out/modules/lib/modules/5.4*/modules.{alias,dep,softdep} ${modpath}/
 cp out/modules/lib/modules/5.4*/modules.order ${modpath}/modules.load
