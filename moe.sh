@@ -6,6 +6,8 @@
 SECONDS=0
 CLANG_VERSION="clang-17.0.0"
 TC_DIR="$HOME/tc/$CLANG_VERSION"
+GCC_64_DIR="$HOME/tc/aarch64-linux-android-15.0"
+GCC_32_DIR="$HOME/tc/arm-linux-androideabi-15.0"
 PATH=$HOME/tc/$CLANG_VERSION/bin:$PATH
 export modpath=AnyKernel3/modules/vendor/lib/modules
 export ARCH=arm64
@@ -42,6 +44,22 @@ if ! [ -d "${TC_DIR}" ]; then
     fi
 fi
 
+if ! [ -d "${GCC_64_DIR}" ]; then
+    echo "gcc not found! Cloning to ${GCC_64_DIR}..."
+    if ! git clone --depth=1 -b 15 https://github.com/whyakari/aarch64-zyc-linux-gnu ${GCC_64_DIR}; then
+        echo "Cloning failed! Aborting..."
+        exit 1
+    fi
+fi
+
+if ! [ -d "${GCC_32_DIR}" ]; then
+    echo "gcc_32 not found! Cloning to ${GCC_32_DIR}..."
+    if ! git clone --depth=1 -b 15 https://github.com/whyakari/arm-zyc-linux-gnueabi ${GCC_32_DIR}; then
+        echo "Cloning failed! Aborting..."
+        exit 1
+    fi
+fi
+
 echo -e "\nCompiling for $DEFCONFIG with variant $VARIANT..." | tee -a "$LOG_FILE"
 
 mkdir -p out
@@ -64,6 +82,8 @@ LLVM_DIS='${LLVM_DIR}/llvm-dis'
 LLVM_NM='${LLVM_DIR}/llvm-nm'
 LLVM=1
 LLVM_IAS=1
+CROSS_COMPILE=$GCC_64_DIR/bin/aarch64-linux-android-
+CLANG_TRIPLE=aarch64-linux-gnu-
 '
 
 make ${ARGS} O=out $DEFCONFIG moto.config | tee -a "$LOG_FILE"
