@@ -12,7 +12,7 @@ export ARCH=arm64
 export KBUILD_BUILD_USER=Moe
 export KBUILD_BUILD_HOST=Nyan
 export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
-export LLVM=1
+export LLVM=0
 
 AK3_DIR="$HOME/AnyKernel3"
 VARIANTS=("fts" "fts")
