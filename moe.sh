@@ -12,7 +12,8 @@ export ARCH=arm64
 export KBUILD_BUILD_USER=Moe
 export KBUILD_BUILD_HOST=Nyan
 export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
-export LLVM=0
+export LLVM=1
+export LLVM_IAS=1
 
 AK3_DIR="$HOME/AnyKernel3"
 VARIANTS=("fts" "fts")
@@ -62,6 +63,7 @@ LLVM_AR='${LLVM_DIR}/llvm-ar'
 LLVM_DIS='${LLVM_DIR}/llvm-dis'
 LLVM_NM='${LLVM_DIR}/llvm-nm'
 LLVM=1
+LLVM_IAS=1
 '
 
 make ${ARGS} O=out $DEFCONFIG moto.config | tee -a "$LOG_FILE"
