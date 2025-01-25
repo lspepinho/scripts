@@ -11,7 +11,7 @@ ORIGIN_DIR=$(pwd)
 TOOLCHAIN=$ORIGIN_DIR/build-shit
 IMAGE=$ORIGIN_DIR/out/arch/arm64/boot/Image.gz
 DEVICE=hanoip
-CONFIG="${DEVICE}_defconfig"
+CONFIG="vendor/${DEVICE}_defconfig"
 FP_MODEL="$*"
 CPO+=(
     ./scripts/config \
