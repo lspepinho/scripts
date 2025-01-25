@@ -1,103 +1,148 @@
 #!/bin/bash
-# Compile script for MoeKernel
-# Copyright (C) 2020-2021 Adithya R.
 
-SECONDS=0
-ZIPNAME="MoeKSU-hanoip-$(date '+%Y%m%d').zip"
-TC_DIR="$HOME/tc/clang-19.0.0"
-GCC_64_DIR="$HOME/tc/aarch64-linux-android-15.0"
-GCC_32_DIR="$HOME/tc/arm-linux-androideabi-15.0"
-AK3_DIR="$HOME/android/AnyKernel3"
-DEFCONFIG="vendor/hanoip_defconfig"
+# Initialize variables
 
-export PATH="$TC_DIR/bin:$PATH"
+GRN='\033[01;32m'
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+RED='\033[01;31m'
+RST='\033[0m'
+ORIGIN_DIR=$(pwd)
+TOOLCHAIN=$ORIGIN_DIR/build-shit
+IMAGE=$ORIGIN_DIR/out/arch/arm64/boot/Image.gz
+DEVICE=hanoip
+CONFIG="${DEVICE}_defconfig"
+FP_MODEL="$*"
+CPO+=(
+    ./scripts/config \
+        --file "$ORIGIN_DIR"/out/.config \
+        -d FINGERPRINT_FPC_TEE_MMI \
+        -e FINGERPRINT_CHIPONE_FPS_MMI
+)
+MAKE+=(
+    -j$(($(nproc)+1)) \
+        O=out \
+        CROSS_COMPILE=aarch64-elf- \
+        CROSS_COMPILE_ARM32=arm-eabi- \
+        HOSTCC=gcc \
+        HOSTCXX=aarch64-elf-g++ \
+        CC=aarch64-elf-gcc \
+        LD=ld.lld
+)
 
-export KBUILD_BUILD_USER=Moe
-export KBUILD_BUILD_HOST=Nyan
+# export environment variables
+export_env_vars() {
+    export KBUILD_BUILD_USER=Const
+    export KBUILD_BUILD_HOST=Coccinelle
+    export ARCH=arm64
 
-if ! [ -d "${TC_DIR}" ]; then
-    echo "Clang not found! Cloning to ${TC_DIR}..."
-    if ! git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r530567.git ${TC_DIR}; then
-        echo "Cloning failed! Aborting..."
-        exit 1
+    # CCACHE
+    export USE_CCACHE=1
+    export CCACHE_SLOPPINESS="file_macro,locale,time_macros"
+    export CCACHE_NOHASHDIR="true"
+}
+
+script_echo() {
+    echo "  $1"
+}
+exit_script() {
+    kill -INT $$
+}
+add_deps() {
+    echo -e "${CYAN}"
+    if [ ! -d "$TOOLCHAIN" ]
+    then
+        script_echo "Create build-shit folder"
+        mkdir "$TOOLCHAIN"
     fi
-fi
 
-if ! [ -d "${GCC_64_DIR}" ]; then
-    echo "gcc not found! Cloning to ${GCC_64_DIR}..."
-    if ! git clone --depth=1 -b 15 https://github.com/whyakari/aarch64-zyc-linux-gnu ${GCC_64_DIR}; then
-        echo "Cloning failed! Aborting..."
-        exit 1
+    if [ ! -d "$TOOLCHAIN/gcc-arm64" ]
+    then
+        script_echo "Downloading toolchain...."
+        cd "$TOOLCHAIN" || exit
+        git clone https://github.com/KenHV/gcc-arm64.git --single-branch -b master --depth=1 2>&1 | sed 's/^/     /'
+        git clone https://github.com/KenHV/gcc-arm.git --single-branch -b master --depth=1 2>&1 | sed 's/^/     /'
+        cd ../
     fi
-fi
-
-if ! [ -d "${GCC_32_DIR}" ]; then
-    echo "gcc_32 not found! Cloning to ${GCC_32_DIR}..."
-    if ! git clone --depth=1 -b 15 https://github.com/whyakari/arm-zyc-linux-gnueabi ${GCC_32_DIR}; then
-        echo "Cloning failed! Aborting..."
-        exit 1
+    verify_toolchain_install
+}
+verify_toolchain_install() {
+    script_echo " "
+    if [[ -d "${TOOLCHAIN}" ]]; then
+        script_echo "I: Toolchain found at default location"
+        export PATH="${TOOLCHAIN}/gcc-arm64/bin:${PATH}:${TOOLCHAIN}/gcc-arm/bin:${PATH}"
+    else
+        script_echo "I: Toolchain not found"
+        script_echo "   Downloading recommended toolchain at ${TOOLCHAIN}..."
+        add_deps
     fi
-fi
+}
+build_kernel_image() {
+    cleanup
+    script_echo " "
+    echo -e "${GRN}"
+    read -p "Write the Kernel version: " KV
+    echo -e "${YELLOW}"
+    script_echo "Building CosmicFresh Kernel For $DEVICE"
 
-if [[ $1 = "-r" || $1 = "--regen" ]]; then
-    make O=out ARCH=arm64 $DEFCONFIG savedefconfig
-    cp out/defconfig arch/arm64/configs/$DEFCONFIG
-    exit
-fi
+    make "${MAKE[@]}" LOCALVERSION="—CosmicFresh-R$KV" $CONFIG 2>&1 | sed 's/^/     /'
 
-if [[ $1 = "-c" || $1 = "--clean" ]]; then
-    rm -rf out
-fi
-
-if [[ $1 = "-m" || $1 = "--menu" ]]; then
-    mkdir -p out
-    make O=out ARCH=arm64 $DEFCONFIG menuconfig
-elif [[ $1 = "menu" ]]; then
-    mkdir -p out
-    make O=out ARCH=arm64 $DEFCONFIG menuconfig
-else
-    mkdir -p out
-    make O=out ARCH=arm64 $DEFCONFIG
-fi
-
-echo -e "\nStarting compilation... wait\n"
-make -j$(nproc --all) \
-    O=out \
-    ARCH=arm64 \
-    CC="ccache clang" \
-    LD=ld.lld \
-    AR=llvm-ar \
-    AS=llvm-as \
-    NM=llvm-nm \
-    OBJCOPY=llvm-objcopy \
-    OBJDUMP=llvm-objdump \
-    STRIP=llvm-strip \
-    CROSS_COMPILE=$GCC_64_DIR/bin/aarch64-linux-android- \
-    CROSS_COMPILE_ARM32=$GCC_32_DIR/bin/arm-linux-androideabi- \
-    CLANG_TRIPLE=aarch64-linux-gnu- \
-    Image.gz-dtb dtbo.img
-
-if [ -f "out/arch/arm64/boot/Image.gz-dtb" ] && \
-   [ -f "out/arch/arm64/boot/dtbo.img" ]; then
-    echo -e "\nKernel compiled successfully! Zipping up...\n"
-    if [ -d "$AK3_DIR" ]; then
-        cp -r $AK3_DIR AnyKernel3
-    elif ! git clone -q -b hanoip https://github.com/MoeKernel/AnyKernel3; then
-        echo -e "\nAnyKernel3 repo not found locally and cloning failed! Aborting..."
-        exit 1
+    echo -e "${GRN}"
+    if [ "$FP_MODEL" = "CPO" ]; then
+        "${CPO[@]}"
+    else
+        FP_MODEL="FPC"
     fi
-    cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3
-    cp out/arch/arm64/boot/dtbo.img AnyKernel3
-    rm -f *zip
-    cd AnyKernel3
-    git checkout hanoip &> /dev/null
-    zip -r9 "../$ZIPNAME" * -x '*.git*' README.md *placeholder
-    cd ..
-    rm -rf AnyKernel3
-    rm -rf out/arch/arm64/boot
-    echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
-    echo "Zip: $ZIPNAME"
-else
-    echo -e "\nCompilation failed!"
-    exit 1
-fi
+    echo -e "${YELLOW}"
+
+    make "${MAKE[@]}" LOCALVERSION="—CosmicFresh-R$KV" 2>&1 | sed 's/^/     /'
+
+    make "${MAKE[@]}" dtbs dtbo.img 2>&1 | sed 's/^/     /'
+
+    SUCCESS=$?
+    echo -e "${RST}"
+
+    if [ $SUCCESS -eq 0 ] && [ -f "$IMAGE" ]
+    then
+        echo -e "${GRN}"
+        script_echo "------------------------------------------------------------"
+        script_echo "Compilation successful..."
+        script_echo "Image can be found at out/arch/arm64/boot/Image.gz"
+        script_echo  "------------------------------------------------------------"
+        build_flashable_zip
+    elif [ $SUCCESS -eq 130 ]
+    then
+        echo -e "${RED}"
+        script_echo "------------------------------------------------------------"
+        script_echo "Build force stopped by the user."
+        script_echo "------------------------------------------------------------"
+        echo -e "${RST}"
+    elif [ $SUCCESS -eq 1 ]
+    then
+        echo -e "${RED}"
+        script_echo "------------------------------------------------------------"
+        script_echo "Compilation failed.."
+        script_echo "------------------------------------------------------------"
+        echo -e "${RST}"
+        cleanup
+    fi
+}
+build_flashable_zip() {
+    script_echo " "
+    script_echo "I: Building kernel image..."
+    echo -e "${GRN}"
+    cp "$ORIGIN_DIR"/out/arch/arm64/boot/{Image.gz,dtbo.img} CosmicFresh/
+    cp "$ORIGIN_DIR"/out/arch/arm64/boot/dts/qcom/sdmmagpie-hanoi-base.dtb CosmicFresh/dtb
+    cd "$ORIGIN_DIR"/CosmicFresh/ || exit
+    zip -r9 "CosmicFresh-R$KV-$FP_MODEL.zip" META-INF version anykernel.sh tools Image.gz dtb dtbo.img
+    rm -rf {Image.gz,dtb,dtbo.img}
+    cd ../
+}
+
+cleanup() {
+    rm -rf "$ORIGIN_DIR"/out/arch/arm64/boot/{Image.gz,dt*}
+    rm -rf "$ORIGIN_DIR"/CosmicFresh/{Image.gz,*.zip,dt*}
+}
+add_deps
+export_env_vars
+build_kernel_image
