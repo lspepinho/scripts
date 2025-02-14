@@ -15,21 +15,21 @@ export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
 export LLVM=1
 
 AK3_DIR="$HOME/AnyKernel3"
-VARIANTS=("fts" "gdx")
-DEFCONFIGS=("vendor/bangkk_fts_defconfig" "vendor/bangkk_gdx_defconfig")
+VARIANTS=("bangkk" "bangkk")
+DEFCONFIGS=("vendor/bangkk_defconfig" "vendor/bangkk_defconfig")
 ZIPNAME_PREFIX="MoeKernel-$(date '+%Y%m%d-%H%M')"
 LOG_FILE="moe.log"
 : > "$LOG_FILE"
 
 if [[ $# -ne 2 || $1 != "--variant" || ! " ${VARIANTS[@]} " =~ " $2 " ]]; then
-    echo "Use: $0 --variant {fts|gdx}" | tee -a "$LOG_FILE"
+    echo "Use: $0 --variant {bangkk|bangkk}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
 VARIANT="$2"
-if [[ "$VARIANT" == "fts" ]]; then
+if [[ "$VARIANT" == "bangkk" ]]; then
     DEFCONFIG="${DEFCONFIGS[0]}"
-elif [[ "$VARIANT" == "gdx" ]]; then
+elif [[ "$VARIANT" == "bangkk" ]]; then
     DEFCONFIG="${DEFCONFIGS[1]}"
 fi
 
