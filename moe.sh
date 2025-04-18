@@ -37,12 +37,6 @@ else
     make O=out ARCH=arm64 $DEFCONFIG
 fi
 
-ARGS='
-ARCH=arm64
-LLVM=1
-LLVM_IAS=1
-'
-
 make O=out ARCH=arm64 ${DEFCONFIG}
 make -kj$(nproc --all) O=out \
         ARCH=arm64 \
