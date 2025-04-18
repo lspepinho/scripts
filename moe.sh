@@ -4,7 +4,7 @@
 # Copyright (C) 2024 Shoiya A.
 
 SECONDS=0
-CLANG_VERSION="clang-17.0.0"
+CLANG_VERSION="clang-19.0.0"
 TC_DIR="$HOME/tc/$CLANG_VERSION"
 PATH=$HOME/tc/$CLANG_VERSION/bin:$PATH
 export modpath=AnyKernel3/modules/vendor/lib/modules
@@ -15,8 +15,8 @@ export LLVM_DIR=$HOME/tc/$CLANG_VERSION/bin
 export LLVM=1
 
 AK3_DIR="$HOME/AnyKernel3"
-DEFCONFIG="vendor/bangkk_defconfig"
-ZIPNAME="MoeKernel-bangkk-$(date '+%Y%m%d-%H%M').zip"
+DEFCONFIG="vendor/caprip_defconfig"
+ZIPNAME="MoeKernel-caprip-$(date '+%Y%m%d-%H%M').zip"
 
 if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Cloning to ${TC_DIR}..."
@@ -38,52 +38,46 @@ else
 fi
 
 ARGS='
-CC=clang
-LD='${LLVM_DIR}/ld.lld'
 ARCH=arm64
-AR='${LLVM_DIR}/llvm-ar'
-NM='${LLVM_DIR}/llvm-nm'
-AS='${LLVM_DIR}/llvm-as'
-OBJCOPY='${LLVM_DIR}/llvm-objcopy'
-OBJDUMP='${LLVM_DIR}/llvm-objdump'
-READELF='${LLVM_DIR}/llvm-readelf'
-OBJSIZE='${LLVM_DIR}/llvm-size'
-STRIP='${LLVM_DIR}/llvm-strip'
-LLVM_AR='${LLVM_DIR}/llvm-ar'
-LLVM_DIS='${LLVM_DIR}/llvm-dis'
-LLVM_NM='${LLVM_DIR}/llvm-nm'
 LLVM=1
+LLVM_IAS=1
 '
 
-if [[ $1 = "-r" || $1 = "--regen" ]]; then
-	make $ARGS $DEFCONFIG savedefconfig
-	cp .config arch/arm64/configs/$DEFCONFIG
-	echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
-	exit
-fi
+make O=out ARCH=arm64 ${DEFCONFIG}
+make -kj$(nproc --all) O=out \
+        ARCH=arm64 \
+        LLVM=1 \
+        LLVM_IAS=1 \
+        CLANG_TRIPLE=aarch64-linux-gnu- \
+        CROSS_COMPILE=aarch64-linux-android- \
+        CROSS_COMPILE_COMPAT=arm-linux-androideabi- \
 
-make ${ARGS} O=out $DEFCONFIG moto.config
-make ${ARGS} O=out -j$(nproc)
+if [[ $1 = "-r" || $1 = "--regen" ]]; then
+        make $DEFCONFIG savedefconfig
+        cp .config arch/arm64/configs/$DEFCONFIG
+        echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
+        exit
+fi
 
 [ ! -e "out/arch/arm64/boot/Image" ] && \
 echo "  ERROR : image binary not found in any of the specified locations , fix compile!" && \
 exit 1
 
-make O=out ${ARGS} -j$(nproc) INSTALL_MOD_PATH=modules INSTALL_MOD_STRIP=1 modules_install
+# make O=out ${ARGS} -j$(nproc) INSTALL_MOD_PATH=modules INSTALL_MOD_STRIP=1 modules_install
 echo -e "\nKernel compiled succesfully! Zipping up...\n"
 
 if [ -d "$AK3_DIR" ]; then
-	cp -r $AK3_DIR AnyKernel3
-	git -C AnyKernel3 checkout bangkk &> /dev/null
+        cp -r $AK3_DIR AnyKernel3
+        git -C AnyKernel3 checkout bangkk &> /dev/null
 elif ! git clone -q https://github.com/MoeKernel/AnyKernel3 -b bangkk; then
-	echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
-	exit 1
+        echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
+        exit 1
 fi
 
 mkdir -p ${modpath}
 kver=$(make kernelversion)
 kmod=$(echo ${kver} | awk -F'.' '{print $3}')
-mkdir -p AnyKernel3/modules/vendor/lib/modules 
+mkdir -p AnyKernel3/modules/vendor/lib/modules
 kver=$(make kernelversion)
 kmod=$(echo ${kver} | awk -F'.' '{print $3}')
 cp out/.config AnyKernel3/config
