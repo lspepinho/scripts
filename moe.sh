@@ -1,4 +1,3 @@
-#!/bin/bash
 # Compile script for Moeニャン kernel
 # Copyright (C) 2020-2021 Adithya R. | (C) 2024 - Shoiya Akari.
 
@@ -17,20 +16,20 @@ fi
 fi
 
 MAKE_PARAMS="O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1 \
-	CROSS_COMPILE=$TC_DIR/bin/llvm-"
+        CROSS_COMPILE=$TC_DIR/bin/llvm-"
 
 export PATH="$TC_DIR/bin:$PATH"
 
 if [[ $1 = "-r" || $1 = "--regen" ]]; then
-	make $MAKE_PARAMS $DEFCONFIG savedefconfig
-	cp out/defconfig arch/arm64/configs/$DEFCONFIG
-	echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
-	exit
+        make $MAKE_PARAMS $DEFCONFIG savedefconfig
+        cp out/defconfig arch/arm64/configs/$DEFCONFIG
+        echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
+        exit
 fi
 
 if [[ $1 = "-c" || $1 = "--clean" ]]; then
-	rm -rf out
-	echo "Cleaned output folder"
+        rm -rf out
+        echo "Cleaned output folder"
 fi
 
 mkdir -p out
@@ -45,22 +44,28 @@ dtb="out/arch/arm64/boot/dts/vendor/qcom/yupik.dtb"
 dtbo="out/arch/arm64/boot/dts/vendor/qcom/lisa-sm7325-overlay.dtbo"
 
 if [ ! -f "$kernel" ] || [ ! -f "$dtb" ] || [ ! -f "$dtbo" ]; then
-	echo -e "\nCompilation failed!"
-	exit 1
+        echo -e "\nCompilation failed!"
+        exit 1
 fi
 
 echo -e "\nKernel compiled succesfully! Zipping up...\n"
 if [ -d "$AK3_DIR" ]; then
-	cp -r $AK3_DIR AnyKernel3
-	git -C AnyKernel3 checkout lisa &> /dev/null
+        cp -r $AK3_DIR AnyKernel3
+        git -C AnyKernel3 checkout lisa &> /dev/null
 elif ! git clone -q https://github.com/MoeKernel/AnyKernel3 -b lisa; then
-	echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
-	exit 1
+        echo -e "\nAnyKernel3 repo not found locally and couldn't clone from GitHub! Aborting..."
+        exit 1
 fi
 
-cp $kernel AnyKernel3
-cp $dtb AnyKernel3/dtb
-python2 scripts/dtc/libfdt/mkdtboimg.py create AnyKernel3/dtbo.img --page_size=4096 $dtbo
+#cp $kernel AnyKernel3
+#cp $dtb AnyKernel3/dtb
+#cp arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+
+cp out/.config AnyKernel3/config
+cp out/arch/arm64/boot/Image AnyKernel3/Image
+cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
+cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+
 cp $(find out/modules/lib/modules/5.4* -name '*.ko') AnyKernel3/modules/vendor/lib/modules/
 cp out/modules/lib/modules/5.4*/modules.{alias,dep,softdep} AnyKernel3/modules/vendor/lib/modules
 cp out/modules/lib/modules/5.4*/modules.order AnyKernel3/modules/vendor/lib/modules/modules.load
