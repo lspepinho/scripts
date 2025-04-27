@@ -1,22 +1,20 @@
-# Compile script for Moeニャン kernel
-# Copyright (C) 2020-2021 Adithya R. | (C) 2024 - Shoiya Akari.
+#!/bin/bash
 
-SECONDS=0
-TC_DIR="$HOME/tc/clang-r450784d"
-AK3_DIR="$HOME/AnyKernel3"
+TC_DIR="$HOME/tc/clang-19.0.0"
 DEFCONFIG="lisa_defconfig"
 ZIPNAME="MoeKernel-lisa-$(date '+%Y%m%d-%H%M').zip"
 
 if ! [ -d "${TC_DIR}" ]; then
 echo "Clang not found! Cloning to ${TC_DIR}..."
-if ! git clone --depth=1 https://gitlab.com/tejas101k/clang-r450784d.git ${TC_DIR}; then
+if ! git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r530567.git ${TC_DIR}; then
 echo "Cloning failed! Aborting..."
 exit 1
 fi
 fi
 
-MAKE_PARAMS="O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1 \
-        CROSS_COMPILE=$TC_DIR/bin/llvm-"
+export PATH="$TC_DIR/bin:$PATH"
+
+MAKE_PARAMS="O=out ARCH=arm64 LLVM=1 LLVM_IAS=1"
 
 export PATH="$TC_DIR/bin:$PATH"
 
@@ -57,14 +55,14 @@ elif ! git clone -q https://github.com/MoeKernel/AnyKernel3 -b lisa; then
         exit 1
 fi
 
-#cp $kernel AnyKernel3
-#cp $dtb AnyKernel3/dtb
-#cp arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
-
+cp $kernel AnyKernel3/Image
+cp $dtb AnyKernel3/dtb
+cp $dtbo AnyKernel3/dtbo.img
 cp out/.config AnyKernel3/config
-cp out/arch/arm64/boot/Image AnyKernel3/Image
-cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
-cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+
+# cp out/arch/arm64/boot/Image AnyKernel3/Image
+# cp out/arch/arm64/boot/dtb.img AnyKernel3/dtb
+# cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
 
 cp $(find out/modules/lib/modules/5.4* -name '*.ko') AnyKernel3/modules/vendor/lib/modules/
 cp out/modules/lib/modules/5.4*/modules.{alias,dep,softdep} AnyKernel3/modules/vendor/lib/modules
@@ -78,3 +76,11 @@ cd ..
 rm -rf AnyKernel3
 echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
 echo "Zip: $ZIPNAME"
+
+if [ ! -f "./go-up" ]; then
+    echo -e "\nDownloading go-up..."
+    wget https://raw.githubusercontent.com/GustavoMends/go-up/master/go-up && chmod +x go-up
+fi
+
+echo -e "\nUploading with go-up..."
+./go-up "$ZIPNAME"
