@@ -17,6 +17,20 @@ if [[ -z "$CHAT_ID" || -z "$API_ID" || -z "$API_HASH" || -z "$BOT_TOKEN" ]]; the
     exit 1
 fi
 
+VARIANT=""
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --variant) VARIANT="$2"; shift ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+if [[ -z "$VARIANT" ]]; then
+    echo "Error: Missing --variant argument (e.g., --variant gdx)"
+    exit 1
+fi
+
 if [[ -f "build_count.txt" ]]; then
     build_count=$(cat build_count.txt)
 else
@@ -42,8 +56,7 @@ start_message=$(curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMess
 
 start_time=$(date +%s)
 
-#./ksu_update.sh
-./moe.sh --variant fts
+./moe.sh --variant "$VARIANT"
 
 if [[ $? -eq 0 ]]; then
     commit_head=$(git log --oneline -1 --pretty=format:'%h - %an')
