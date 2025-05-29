@@ -35,7 +35,7 @@ fi
 
 if ! [ -d "${TC_DIR}" ]; then
     echo "Clang not found! Cloning to ${TC_DIR}..." | tee -a "$LOG_FILE"
-    if ! git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r530567.git ${TC_DIR} >> "$LOG_FILE" 2>&1; then
+    if ! git clone --depth=1 https://gitlab.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-r547379.git ${TC_DIR} >> "$LOG_FILE" 2>&1; then
         echo "Cloning failed! Aborting..." | tee -a "$LOG_FILE"
         exit 1
     fi
